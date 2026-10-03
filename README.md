@@ -12,7 +12,7 @@ An insurance data engineering project that brings policy, customer, claim, vehic
 
 Silver tables clean and enrich the bronze data. Gold materialized views combine claims with policies and customers, aggregate telematics by vehicle, and join those results into a claims view.
 
-![Smart Claims data lakehouse architecture](screenshots/smart_claims_architecture.png)
+![Smart Claims data lakehouse architecture](screenshots/Smart Claims Lakehouse Architecture.png)
 
 
 
