@@ -1,0 +1,85 @@
+SQL Server -> Databricks bronze ingestion: setup steps
+====================================================
+
+This file is a runbook for creating the Lakeflow Connect SQL Server ingestion pipeline
+in the Databricks UI. It is not executable code. The source is the Azure SQL database
+configured in the repository's .env file. The destination is
+smart_claims_catalog.01_bronze.
+
+1. Prepare the local Python environment.
+   From the repository root, use Python 3.13 and install the dependencies:
+       python -m pip install -e . requests
+
+2. Configure Azure SQL credentials.
+   Put SQL_SERVER, SQL_DATABASE, SQL_USER, and SQL_PASSWORD in the ignored .env file.
+   Confirm that the SQL Server is reachable from both your machine and Databricks.
+   Use an account with the permissions needed to create tables and enable change
+   tracking. Do not place passwords in this file or in pipeline source code.
+
+3. Load the source tables.
+   Run:
+       python scripts/azure_sql/load_source_tables.py
+   This creates dbo.claims, dbo.customers, and dbo.policies if they do not exist,
+   then inserts CSV rows with new primary keys. It preserves existing tables.
+   Confirm that each table has data and a primary key: claim_no, customer_id,
+   and POLICY_NO, respectively.
+
+4. Enable change capture on the source database and tables.
+   Run:
+       python scripts/azure_sql/enable_change_tracking_and_cdc.py
+       python scripts/azure_sql/install_lakeflow_sql_utilities.py
+   Read the complete output. These scripts may log a SQL error as [WARN] and
+   continue; investigate warnings before creating the ingestion pipeline. The
+   utility installer currently passes 'sqladmin' as the ingestion user to its
+   stored procedures. If your Databricks ingestion login differs, update the
+   @User arguments in scripts/azure_sql/install_lakeflow_sql_utilities.py
+   before running it.
+
+5. Create a SQL Server connection in Databricks.
+   In Catalog Explorer, open Connect > Connections > Create connection and
+   select SQL Server. Enter the Azure SQL host and the credentials for the
+   ingestion user. Use the source database from SQL_DATABASE. Give the
+   connection a recognizable name, such as smart_claims_sql.
+
+6. Open the SQL Server ingestion wizard.
+   In the Databricks sidebar, choose Data Ingestion > SQL Server and select
+   the connection from step 5. Give the ingestion pipeline and its gateway
+   distinct names. Select an event-log location and a staging catalog/schema
+   where the gateway can create its staging volume.
+
+7. Select the exact source tables.
+   Choose dbo.claims, dbo.customers, and dbo.policies from the source database.
+   Keep their destination names as claims, customers, and policies so the
+   silver transformations can read them without code changes.
+
+8. Set the destination.
+   Select catalog smart_claims_catalog and schema 01_bronze. The expected
+   tables are:
+       smart_claims_catalog.01_bronze.claims
+       smart_claims_catalog.01_bronze.customers
+       smart_claims_catalog.01_bronze.policies
+
+9. Validate and run the pipeline.
+   Use the wizard's database setup validation and resolve any reported source
+   permission or change tracking issues. Save and run the pipeline. Keep the
+   ingestion gateway running continuously; schedule the ingestion pipeline
+   if you need recurring updates.
+
+10. Verify the bronze tables.
+    Check the pipeline event log and processed-record counts. In a Databricks
+    SQL editor, run:
+        SELECT COUNT(*) FROM smart_claims_catalog.`01_bronze`.claims;
+        SELECT COUNT(*) FROM smart_claims_catalog.`01_bronze`.customers;
+        SELECT COUNT(*) FROM smart_claims_catalog.`01_bronze`.policies;
+    After the initial snapshot succeeds, run the bronze_to_silver.py pipeline
+    and check its claims, customers, and policies outputs.
+
+11. Check incremental ingestion.
+    Add a new row with a new primary key to one of the source CSV files,
+    rerun scripts/azure_sql/load_source_tables.py,
+    allow the ingestion pipeline to process the change, and confirm the row
+    appears in the matching bronze table. Rerunning the loader alone does not
+    modify existing rows with the same key.
+
+Databricks reference:
+https://learn.microsoft.com/en-us/azure/databricks/ingestion/lakeflow-connect/sql-server-pipeline

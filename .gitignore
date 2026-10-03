@@ -1,0 +1,22 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+.env
+.producer-checkpoint
+
+# Local Azure SQL inspection and reset helpers
+scripts/azure_sql/query_claims_table.py
+scripts/azure_sql/reset_source_tables.py
+
+# Editor preferences
+.vscode/
+
+# Local source datasets and claim images
+/data/
