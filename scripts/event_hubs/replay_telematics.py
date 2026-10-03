@@ -44,32 +44,86 @@ def records(data_dir):
             yield from batch.to_pylist()
 
 
-def send_record(producer, payload):
+def retry_connection(operation):
     delay = 5
     while True:
         try:
-            batch = producer.create_batch()
-            batch.add(EventData(payload))
-            producer.send_batch(batch)
-            return
+            return operation()
         except (ConnectError, ConnectionLostError) as exc:
             print(f"Connection interrupted ({type(exc).__name__}); retrying in {delay}s", flush=True)
             time.sleep(delay)
             delay = min(delay * 2, 60)
 
 
+def replay_records(producer, source, *, skip, limit, dry_run, batch_size, interval_seconds, checkpoint_path):
+    processed = 0
+    acknowledged = 0
+    batch = None
+    buffered = 0
+
+    def flush_batch():
+        nonlocal batch, buffered, acknowledged
+        if not buffered:
+            return
+        retry_connection(lambda: producer.send_batch(batch))
+        previous = acknowledged
+        acknowledged += buffered
+        checkpoint_path.write_text(str(skip + acknowledged), encoding="utf-8")
+        if previous == 0 or acknowledged // 1000 > previous // 1000:
+            print(f"Sent through source record {skip + acknowledged}", flush=True)
+        batch = None
+        buffered = 0
+
+    try:
+        for record in source:
+            payload = json.dumps(record, default=json_value, ensure_ascii=False)
+            if dry_run:
+                print(payload)
+            else:
+                if batch is None:
+                    batch = retry_connection(producer.create_batch)
+                event = EventData(payload)
+                try:
+                    batch.add(event)
+                except ValueError:
+                    if not buffered:
+                        raise ValueError("A single event exceeds the Event Hubs batch size limit") from None
+                    flush_batch()
+                    batch = retry_connection(producer.create_batch)
+                    try:
+                        batch.add(event)
+                    except ValueError:
+                        raise ValueError("A single event exceeds the Event Hubs batch size limit") from None
+                buffered += 1
+                if buffered >= batch_size:
+                    flush_batch()
+
+            processed += 1
+            if limit is not None and processed >= limit:
+                break
+            if interval_seconds:
+                time.sleep(interval_seconds)
+    except KeyboardInterrupt:
+        print("Stopped by user")
+    else:
+        flush_batch()
+
+    return processed if dry_run else acknowledged
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Send Parquet rows to Azure Event Hubs one at a time")
+    parser = argparse.ArgumentParser(description="Replay Parquet rows to Azure Event Hubs")
     parser.add_argument("--data-dir", type=Path, default=REPO_ROOT / "data" / "telematics")
     parser.add_argument("--interval-seconds", type=float, default=0, help="Delay between records (default: 0)")
+    parser.add_argument("--batch-size", type=int, default=100, help="Maximum events per send (default: 100)")
     parser.add_argument("--limit", type=int, help="Stop after this many records")
     parser.add_argument("--skip", type=int, default=0, help="Skip this many source records before sending")
     parser.add_argument("--resume", action="store_true", help="Resume after the source record in .producer-checkpoint")
     parser.add_argument("--dry-run", action="store_true", help="Print records without sending them")
     args = parser.parse_args()
 
-    if args.interval_seconds < 0 or args.limit is not None and args.limit < 1 or args.skip < 0:
-        parser.error("--interval-seconds and --skip must be nonnegative; --limit must be positive")
+    if args.interval_seconds < 0 or args.limit is not None and args.limit < 1 or args.skip < 0 or args.batch_size < 1:
+        parser.error("--interval-seconds and --skip must be nonnegative; --limit and --batch-size must be positive")
     if args.resume:
         if args.skip:
             parser.error("Use either --resume or --skip, not both")
@@ -78,7 +132,6 @@ def main():
         args.skip = int(CHECKPOINT_PATH.read_text(encoding="utf-8"))
 
     producer = None
-    sent = 0
     try:
         if not args.dry_run:
             load_dotenv(REPO_ROOT / ".env")
@@ -90,24 +143,16 @@ def main():
                 eventhub_name=EVENTHUB_NAME,
             )
 
-        for record in islice(records(args.data_dir), args.skip, None):
-            payload = json.dumps(record, default=json_value, ensure_ascii=False)
-            if args.dry_run:
-                print(payload)
-            else:
-                send_record(producer, payload)
-
-            sent += 1
-            if not args.dry_run:
-                CHECKPOINT_PATH.write_text(str(args.skip + sent), encoding="utf-8")
-            if not args.dry_run and (sent == 1 or sent % 1000 == 0):
-                print(f"Sent through source record {args.skip + sent}", flush=True)
-            if args.limit is not None and sent >= args.limit:
-                break
-            if args.interval_seconds:
-                time.sleep(args.interval_seconds)
-    except KeyboardInterrupt:
-        print("Stopped by user")
+        sent = replay_records(
+            producer,
+            islice(records(args.data_dir), args.skip, None),
+            skip=args.skip,
+            limit=args.limit,
+            dry_run=args.dry_run,
+            batch_size=1 if args.interval_seconds else args.batch_size,
+            interval_seconds=args.interval_seconds,
+            checkpoint_path=CHECKPOINT_PATH,
+        )
     finally:
         if producer is not None:
             producer.close()

@@ -113,7 +113,9 @@ python scripts/event_hubs/replay_telematics.py --interval-seconds 1 --limit 10
 python scripts/event_hubs/replay_telematics.py
 ```
 
-`replay_telematics.py` reads `data/telematics/*.parquet` in filename order, sends one JSON event per row, and records the last acknowledged source position in the root `.producer-checkpoint`. After an interruption, use `python scripts/event_hubs/replay_telematics.py --resume`. Use `--skip N` to start after a known number of source rows; `--resume` and `--skip` cannot be combined. The default delay is zero seconds. The producer stops at the end of the files or on Ctrl+C.
+`replay_telematics.py` reads `data/telematics/*.parquet` in filename order and encodes each row as one JSON event. By default it sends up to 100 events per batch; Event Hubs' byte limit can make a batch smaller. Set `--batch-size N` to adjust the maximum. Setting `--interval-seconds` sends one event at a time to preserve the requested pacing.
+
+The producer records the last acknowledged source position in the root `.producer-checkpoint` after each successful batch. After an interruption, use `python scripts/event_hubs/replay_telematics.py --resume`. Use `--skip N` to start after a known number of source rows; `--resume` and `--skip` cannot be combined. The default delay is zero seconds. The producer stops at the end of the files or on Ctrl+C. As with the previous replay, a connection failure after Event Hubs accepts a batch but before the acknowledgement reaches the client can cause a batch to be sent again.
 
 ### 4. Stage image data
 
