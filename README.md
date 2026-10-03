@@ -14,7 +14,7 @@ Silver tables clean and enrich the bronze data. Gold materialized views combine 
 
 ![Smart Claims data lakehouse architecture](screenshots/smart_claims_architecture.png)
 
-[Open the editable SVG version](screenshots/smart_claims_architecture.svg).
+
 
 ## Repository guide
 
