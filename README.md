@@ -51,6 +51,7 @@ flowchart LR
 | Scheduled end-to-end workflow | [scheduled_pipeline_workflow.png](screenshots/scheduled_pipeline_workflow.png) |
 | Object storage ingestion | [object_storage_ingestion_pipeline.png](screenshots/object_storage_ingestion_pipeline.png) |
 | Event Hubs telematics ingestion | [telematics_event_hubs_ingestion.png](screenshots/telematics_event_hubs_ingestion.png) |
+| Event Hubs namespace metrics | [event_hubs_namespace_metrics.png](screenshots/event_hubs_namespace_metrics.png) |
 | Azure SQL ingestion | [azure_sql_ingestion_pipeline.png](screenshots/azure_sql_ingestion_pipeline.png) |
 | Bronze-to-gold transformations | [bronze_silver_gold_transformation.png](screenshots/bronze_silver_gold_transformation.png) |
 
