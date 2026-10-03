@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1400" viewBox="0 0 2400 1400" role="img" aria-labelledby="title desc">
+<title id="title">Smart Claims insurance data lakehouse architecture</title>
+<desc id="desc">Azure SQL, Event Hubs, and Unity Catalog volumes feed Databricks bronze and silver tables. Gold views combine claim, customer, policy, and vehicle telematics data.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M 1 1 L 9 5 L 1 9 z" fill="#66788D"/></marker>
+<filter id="shadow" x="-20%" y="-30%" width="140%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#20304A" flood-opacity="0.10"/></filter>
+<style>text{font-family:Segoe UI,Arial,sans-serif;fill:#243247}.title{font-size:44px;font-weight:750}.subtitle{font-size:20px;fill:#5B6B7D}.panel-title{font-size:25px;font-weight:750;letter-spacing:1.5px}.lane{font-size:15px;font-weight:700;letter-spacing:2px;fill:#8290A1}.box-title{font-size:23px;font-weight:720}.box-detail{font-size:16px;fill:#5B6B7D}.table{font-size:21px;font-weight:650}.table-small{font-size:18px;font-weight:650}.note{font-size:17px;fill:#5B6B7D}.footer{font-size:19px;font-weight:650}</style>
+</defs>
+<rect x="0" y="0" width="2400" height="1400" rx="0" fill="#FFFFFF" stroke="none" stroke-width="1.5"/>
+<text x="42" y="64" class="title">Smart Claims</text>
+<text x="42" y="102" class="subtitle">Azure insurance data lakehouse  •  ingestion to analytics</text>
+<rect x="2030" y="32" width="320" height="70" rx="19" fill="#E8F4FF" stroke="#9CCCF4" stroke-width="1.4"/>
+<text x="2190" y="77" class="footer" text-anchor="middle">Microsoft Azure  +  Databricks</text>
+<rect x="40" y="145" width="690" height="1070" rx="29" fill="#F5FAFF" stroke="#A9CFEF" stroke-width="2.0" stroke-dasharray="12 10"/>
+<text x="385.0" y="191" class="panel-title" text-anchor="middle">DATA INGESTION</text>
+<path d="M66 215 H704" fill="none" stroke="#A9CFEF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="750" y="145" width="365" height="1070" rx="29" fill="#FFF8EF" stroke="#E7C494" stroke-width="2.0" stroke-dasharray="12 10"/>
+<text x="932.5" y="191" class="panel-title" text-anchor="middle">BRONZE</text>
+<path d="M776 215 H1089" fill="none" stroke="#E7C494" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1135" y="145" width="390" height="1070" rx="29" fill="#F7FAFC" stroke="#C9D5DF" stroke-width="2.0" stroke-dasharray="12 10"/>
+<text x="1330.0" y="191" class="panel-title" text-anchor="middle">SILVER</text>
+<path d="M1161 215 H1499" fill="none" stroke="#C9D5DF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1545" y="145" width="525" height="1070" rx="29" fill="#FFFCED" stroke="#E7D178" stroke-width="2.0" stroke-dasharray="12 10"/>
+<text x="1807.5" y="191" class="panel-title" text-anchor="middle">GOLD</text>
+<path d="M1571 215 H2044" fill="none" stroke="#E7D178" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M65 468 H2045" fill="none" stroke="#D4DCE5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8 10"/>
+<path d="M65 824 H2045" fill="none" stroke="#D4DCE5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8 10"/>
+<text x="70" y="242" class="lane">STREAMING TELEMATICS</text>
+<text x="70" y="500" class="lane">AZURE SQL CHANGE INGESTION</text>
+<text x="70" y="855" class="lane">IMAGE AND METADATA INGESTION</text>
+<rect x="75" y="280" width="175" height="88" rx="17" fill="#E0F6E8" stroke="#9BCBAB" stroke-width="1.8" filter="url(#shadow)"/>
+<rect x="75" y="280" width="8" height="88" rx="4" fill="#4BAE70" stroke="none" stroke-width="1.5"/>
+<text x="99" y="315" class="box-title">Parquet</text>
+<text x="99" y="342" class="box-detail">vehicle events</text>
+<rect x="282" y="280" width="158" height="88" rx="17" fill="#E8F4FF" stroke="#9CCCF4" stroke-width="1.8" filter="url(#shadow)"/>
+<rect x="282" y="280" width="8" height="88" rx="4" fill="#1677D2" stroke="none" stroke-width="1.5"/>
+<text x="306" y="315" class="box-title">Python replay</text>
+<text x="306" y="342" class="box-detail">batched sends</text>
+<rect x="474" y="280" width="220" height="88" rx="17" fill="#E8F4FF" stroke="#9CCCF4" stroke-width="1.8" filter="url(#shadow)"/>
+<rect x="474" y="280" width="8" height="88" rx="4" fill="#1677D2" stroke="none" stroke-width="1.5"/>
+<text x="498" y="315" class="box-title">Event Hubs</text>
+<text x="498" y="342" class="box-detail">telematics hub</text>
+<path d="M250 324 H282" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M440 324 H474" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M694 324 H785" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="785" y="291" width="295" height="62" rx="14" fill="#FFE7C7" stroke="#D9A967" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="932.5" y="331" class="table" text-anchor="middle">telematics</text>
+<path d="M1080 322 H1170" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="1170" y="291" width="320" height="62" rx="14" fill="#EBF0F5" stroke="#ABBBC9" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="1330.0" y="331" class="table" text-anchor="middle">telematics</text>
+<text x="1330" y="378" class="note" text-anchor="middle">timestamps • coordinates</text>
+<path d="M1490 322 H1580" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="1580" y="268" width="455" height="105" rx="17" fill="#FFF0AF" stroke="#D4BB53" stroke-width="1.8" filter="url(#shadow)"/>
+<rect x="1580" y="268" width="8" height="105" rx="4" fill="#E2B534" stroke="none" stroke-width="1.5"/>
+<text x="1604" y="303" class="box-title">aggregated_telematics</text>
+<text x="1604" y="330" class="box-detail">speed metrics • event count / vehicle</text>
+<rect x="75" y="525" width="182" height="62" rx="14" fill="#E0F6E8" stroke="#9BCBAB" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="166.0" y="565" class="table-small" text-anchor="middle">claims.csv</text>
+<path d="M257 556 H286" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="75" y="609" width="182" height="62" rx="14" fill="#E0F6E8" stroke="#9BCBAB" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="166.0" y="649" class="table-small" text-anchor="middle">customers.csv</text>
+<path d="M257 640 H286" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="75" y="693" width="182" height="62" rx="14" fill="#E0F6E8" stroke="#9BCBAB" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="166.0" y="733" class="table-small" text-anchor="middle">policies.csv</text>
+<path d="M257 724 H286" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M286 556 V724" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M286 640 H311" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="311" y="595" width="168" height="90" rx="17" fill="#E8F4FF" stroke="#9CCCF4" stroke-width="1.8" filter="url(#shadow)"/>
+<rect x="311" y="595" width="8" height="90" rx="4" fill="#1677D2" stroke="none" stroke-width="1.5"/>
+<text x="335" y="630" class="box-title">Azure SQL</text>
+<text x="335" y="657" class="box-detail">source tables</text>
+<path d="M479 640 H514" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="514" y="595" width="182" height="90" rx="17" fill="#FFEDE8" stroke="#F0A994" stroke-width="1.8" filter="url(#shadow)"/>
+<rect x="514" y="595" width="8" height="90" rx="4" fill="#F17657" stroke="none" stroke-width="1.5"/>
+<text x="538" y="630" class="box-title">Lakeflow</text>
+<text x="538" y="657" class="box-detail">Connect</text>
+<path d="M696 640 H764" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M764 557 V725" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M764 557 H785" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="785" y="526" width="295" height="62" rx="14" fill="#FFE7C7" stroke="#D9A967" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="932.5" y="566" class="table" text-anchor="middle">claims</text>
+<path d="M1080 557 H1170" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="1170" y="526" width="320" height="62" rx="14" fill="#EBF0F5" stroke="#ABBBC9" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="1330.0" y="566" class="table" text-anchor="middle">claims</text>
+<path d="M1490 557 H1532" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M764 641 H785" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="785" y="610" width="295" height="62" rx="14" fill="#FFE7C7" stroke="#D9A967" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="932.5" y="650" class="table" text-anchor="middle">customers</text>
+<path d="M1080 641 H1170" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="1170" y="610" width="320" height="62" rx="14" fill="#EBF0F5" stroke="#ABBBC9" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="1330.0" y="650" class="table" text-anchor="middle">customers</text>
+<path d="M1490 641 H1532" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M764 725 H785" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="785" y="694" width="295" height="62" rx="14" fill="#FFE7C7" stroke="#D9A967" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="932.5" y="734" class="table" text-anchor="middle">policies</text>
+<path d="M1080 725 H1170" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="1170" y="694" width="320" height="62" rx="14" fill="#EBF0F5" stroke="#ABBBC9" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="1330.0" y="734" class="table" text-anchor="middle">policies</text>
+<path d="M1490 725 H1532" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1532 557 V725" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1532 641 H1580" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="1580" y="588" width="455" height="105" rx="17" fill="#FFF0AF" stroke="#D4BB53" stroke-width="1.8" filter="url(#shadow)"/>
+<rect x="1580" y="588" width="8" height="105" rx="4" fill="#E2B534" stroke="none" stroke-width="1.5"/>
+<text x="1604" y="623" class="box-title">customer_claim_policy</text>
+<text x="1604" y="650" class="box-detail">claims + policies + customers</text>
+<rect x="75" y="898" width="182" height="62" rx="14" fill="#E0F6E8" stroke="#9BCBAB" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="166.0" y="938" class="table-small" text-anchor="middle">training images</text>
+<rect x="75" y="1002" width="182" height="62" rx="14" fill="#E0F6E8" stroke="#9BCBAB" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="166.0" y="1042" class="table-small" text-anchor="middle">claim metadata</text>
+<path d="M257 929 H286" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M257 1033 H286" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M286 929 V1033" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M286 981 H311" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="311" y="936" width="168" height="90" rx="17" fill="#E8F4FF" stroke="#9CCCF4" stroke-width="1.8" filter="url(#shadow)"/>
+<rect x="311" y="936" width="8" height="90" rx="4" fill="#1677D2" stroke="none" stroke-width="1.5"/>
+<text x="335" y="971" class="box-title">UC Volume</text>
+<text x="335" y="998" class="box-detail">landing files</text>
+<path d="M479 981 H514" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="514" y="936" width="182" height="90" rx="17" fill="#FFEDE8" stroke="#F0A994" stroke-width="1.8" filter="url(#shadow)"/>
+<rect x="514" y="936" width="8" height="90" rx="4" fill="#F17657" stroke="none" stroke-width="1.5"/>
+<text x="538" y="971" class="box-title">Auto Loader</text>
+<text x="538" y="998" class="box-detail">files to tables</text>
+<path d="M696 981 H764" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M764 929 V1033" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M764 929 H785" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="785" y="898" width="295" height="62" rx="14" fill="#FFE7C7" stroke="#D9A967" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="932.5" y="938" class="table-small" text-anchor="middle">training_images</text>
+<path d="M764 1033 H785" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="785" y="1002" width="295" height="62" rx="14" fill="#FFE7C7" stroke="#D9A967" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="932.5" y="1042" class="table-small" text-anchor="middle">claim_images_meta</text>
+<path d="M1080 929 H1170" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="1170" y="898" width="320" height="62" rx="14" fill="#EBF0F5" stroke="#ABBBC9" stroke-width="1.7" filter="url(#shadow)"/>
+<text x="1330.0" y="938" class="table-small" text-anchor="middle">training_images</text>
+<text x="1330" y="1001" class="note" text-anchor="middle">damage label extracted from filename</text>
+<rect x="1170" y="1050" width="320" height="80" rx="14" fill="#FFFFFF" stroke="#CED8E1" stroke-width="1.3"/>
+<text x="1330" y="1082" class="table-small" text-anchor="middle">Image data stops at silver</text>
+<text x="1330" y="1111" class="note" text-anchor="middle">No image model in this repository</text>
+<path d="M2035 320 H2060 V875 H1985 V909" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M1807 693 V909" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="1580" y="909" width="455" height="112" rx="17" fill="#FFF0AF" stroke="#D4BB53" stroke-width="1.8" filter="url(#shadow)"/>
+<rect x="1580" y="909" width="8" height="112" rx="4" fill="#E2B534" stroke="none" stroke-width="1.5"/>
+<text x="1604" y="944" class="box-title" style="font-size:19px">customer_claim_policy_telematics</text>
+<text x="1604" y="971" class="box-detail">joined on chassis_no</text>
+<path d="M2035 965 H2110" fill="none" stroke="#738297" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="2110" y="919" width="245" height="95" rx="17" fill="#E9F7F1" stroke="#A1D9BD" stroke-width="1.8" filter="url(#shadow)"/>
+<rect x="2110" y="919" width="8" height="95" rx="4" fill="#48AD7C" stroke="none" stroke-width="1.5"/>
+<text x="2134" y="954" class="box-title">Claims analytics</text>
+<text x="2134" y="981" class="box-detail">gold view for queries</text>
+<text x="1807" y="1070" class="note" text-anchor="middle">Gold tables are materialized views</text>
+<rect x="750" y="1240" width="1320" height="78" rx="18" fill="#EAF5FF" stroke="#8EC3EC" stroke-width="1.8"/>
+<text x="1410" y="1289" class="footer" text-anchor="middle">Unity Catalog  •  smart_claims_catalog</text>
+<rect x="750" y="1330" width="1320" height="42" rx="13" fill="#FFF0EA" stroke="#F3B09C" stroke-width="1.4"/>
+<text x="1410" y="1358" class="footer" text-anchor="middle">Lakeflow Connect   •   Spark Declarative Pipelines   •   scheduled workflow</text>
+</svg>

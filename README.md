@@ -12,21 +12,9 @@ An insurance data engineering project that brings policy, customer, claim, vehic
 
 Silver tables clean and enrich the bronze data. Gold materialized views combine claims with policies and customers, aggregate telematics by vehicle, and join those results into a claims view.
 
-```mermaid
-flowchart LR
-    CSV[Claims, customers, policies CSV] --> SQL[Azure SQL]
-    SQL --> SQLPIPE[SQL ingestion pipeline]
-    PARQUET[Telematics Parquet] --> PRODUCER[replay_telematics.py]
-    PRODUCER --> HUB[Azure Event Hubs]
-    HUB --> STREAM[Streaming ingestion]
-    IMAGES[Training images and claim metadata] --> VOLUME[Unity Catalog volumes]
-    VOLUME --> AUTO[Auto Loader]
-    SQLPIPE --> BRONZE[01_bronze]
-    STREAM --> BRONZE
-    AUTO --> BRONZE
-    BRONZE --> SILVER[02_silver]
-    SILVER --> GOLD[03_gold]
-```
+![Smart Claims data lakehouse architecture](screenshots/smart_claims_architecture.png)
+
+[Open the editable SVG version](screenshots/smart_claims_architecture.svg).
 
 ## Repository guide
 
@@ -47,6 +35,7 @@ flowchart LR
 
 | View | Screenshot |
 | --- | --- |
+| Project architecture | [smart_claims_architecture.png](screenshots/smart_claims_architecture.png) |
 | Azure resource group and services | [azure_resource_group_overview.png](screenshots/azure_resource_group_overview.png) |
 | Scheduled end-to-end workflow | [scheduled_pipeline_workflow.png](screenshots/scheduled_pipeline_workflow.png) |
 | Object storage ingestion | [object_storage_ingestion_pipeline.png](screenshots/object_storage_ingestion_pipeline.png) |
